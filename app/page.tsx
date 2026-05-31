@@ -1,65 +1,393 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Image from "next/image";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
+type CollageItem = {
+  src: string;
+  left: string;
+  top: string;
+  size: number;
+  delay: number;
+  className?: string;
+};
+
+type Particle = {
+  left: string;
+  top: string;
+  delay: number;
+  size: number;
+  icon: string;
+};
+
+const COLLAGE: CollageItem[] = [
+  { src: "/p3.png", left: "4%", top: "8%", size: 170, delay: 0.15, className: "rotate-[-8deg]" },
+  { src: "/p3.png", left: "77%", top: "9%", size: 150, delay: 0.45, className: "rotate-[8deg]" },
+  { src: "/p3.png", left: "8%", top: "60%", size: 180, delay: 0.75, className: "rotate-[6deg]" },
+  { src: "/p3.png", left: "74%", top: "60%", size: 190, delay: 1.05, className: "rotate-[-5deg]" },
+  { src: "/p3.png", left: "44%", top: "72%", size: 140, delay: 1.35, className: "rotate-[10deg]" },
+  { src: "/p2.jpeg", left: "31%", top: "18%", size: 360, delay: 0.6, className: "rotate-[-2deg]" },
+];
+
+const PARTICLES: Particle[] = Array.from({ length: 12 }).map((_, index) => ({
+  left: `${4 + (index * 7.7) % 88}%`,
+  top: `${8 + (index * 10.9) % 82}%`,
+  delay: (index % 6) * 0.45,
+  size: 10 + (index % 4) * 5,
+  icon: index % 3 === 0 ? "♡" : index % 3 === 1 ? "✦" : "✧",
+}));
+
+function Scene({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <section className={`w-full max-w-6xl rounded-[32px] transition-all duration-[800ms] ease-out ${className}`}>{children}</section>;
+}
+
+export default function BirthdayPage() {
+  const [started, setStarted] = useState(false);
+  const [step, setStep] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!started) return;
+
+    if (audioRef.current) {
+      audioRef.current.volume = 0.32;
+    }
+
+    const timers = [
+      window.setTimeout(() => setStep(1), 900),
+      window.setTimeout(() => setStep(2), 3200),
+      window.setTimeout(() => setStep(3), 6400),
+    ];
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [started]);
+
+  const openSurprise = () => {
+    setStarted(true);
+    audioRef.current?.play().catch(() => {});
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="relative min-h-screen overflow-hidden bg-[#050308] text-white antialiased">
+      <audio ref={audioRef} loop preload="auto">
+        <source src="/b2.mpeg" type="audio/mpeg" />
+      </audio>
+
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top_left,rgba(255,215,120,0.08),transparent_22%),radial-gradient(circle_at_top_right,rgba(255,105,180,0.08),transparent_20%),linear-gradient(to_bottom,#09050d_0%,#050308_45%,#030205_100%)]" />
+      <div className="absolute inset-0 -z-20 animate-bgZoom bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.02),transparent_34%),radial-gradient(circle_at_35%_70%,rgba(255,215,120,0.05),transparent_18%),radial-gradient(circle_at_70%_30%,rgba(255,105,180,0.05),transparent_16%)] opacity-80 blur-2xl" />
+
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        {COLLAGE.map((item, index) => (
+          <div
+            key={`${item.src}-${index}`}
+            style={{
+              left: item.left,
+              top: item.top,
+              width: item.size,
+              height: item.size,
+              animationDelay: `${item.delay}s`,
+            }}
+            className={`absolute opacity-0 animate-collageFadeIn ${item.className ?? ""}`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className="relative h-full w-full overflow-hidden rounded-[28px] border border-white/12 bg-white/5 shadow-[0_35px_90px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+              <Image
+                src={item.src}
+                alt={`birthday-collage-${index}`}
+                fill
+                sizes="(max-width: 768px) 42vw, 18vw"
+                className="object-cover object-center grayscale sepia brightness-[0.82] motion-safe:animate-mainZoom"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.38))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,120,0.12),transparent_45%)]" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none -z-[5] overflow-hidden">
+        {PARTICLES.map((particle, index) => (
+          <span
+            key={index}
+            style={{
+              left: particle.left,
+              top: particle.top,
+              fontSize: particle.size,
+              animationDelay: `${particle.delay}s`,
+            }}
+            className="absolute text-amber-100/75 drop-shadow-[0_0_18px_rgba(255,210,120,0.35)] animate-particleFloat"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {particle.icon}
+          </span>
+        ))}
+      </div>
+
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 sm:py-16">
+        {!started ? (
+          <Scene className="border border-white/10 bg-black/30 px-6 py-7 shadow-[0_35px_120px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:px-8 sm:py-10">
+            <div className="grid items-center gap-8 md:grid-cols-[1.05fr_0.95fr]">
+              <div className="space-y-4 text-center md:text-left">
+                <h1 className="max-w-xl font-serif text-4xl leading-tight text-[#fff5e8] drop-shadow-[0_18px_60px_rgba(0,0,0,0.65)] sm:text-5xl md:text-7xl">
+                  Happy Birthday Pirunthu
+                </h1>
+                <p className="mx-auto max-w-xl text-sm leading-7 text-[#f8e8d2]/90 md:mx-0 md:text-base">
+                  More wish your happy birthday da.
+                </p>
+                <button
+                  type="button"
+                  onClick={openSurprise}
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-amber-200/30 bg-gradient-to-r from-amber-200 via-amber-100 to-pink-200 px-7 py-3 text-sm font-semibold text-[#2f1b00] shadow-[0_18px_60px_rgba(255,205,120,0.24)] transition-transform duration-300 hover:scale-[1.03]"
+                >
+                  Click Here ✨
+                </button>
+              </div>
+
+              <div className="relative hidden md:block">
+                <div className="absolute -inset-8 rounded-[36px] bg-[radial-gradient(circle_at_center,rgba(255,215,120,0.14),transparent_55%),radial-gradient(circle_at_top_right,rgba(255,105,180,0.10),transparent_28%)] blur-2xl" />
+                <div className="relative overflow-hidden rounded-[32px] border border-white/12 bg-black/35 p-2 shadow-[0_28px_80px_rgba(0,0,0,0.65)]">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[26px]">
+                    <Image
+                      src="/p2.jpeg"
+                      alt="birthday preview"
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 0vw, 40vw"
+                      className="object-cover object-center motion-safe:animate-mainZoom"
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.35))]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,120,0.10),transparent_40%)]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Scene>
+        ) : (
+          <div className="w-full max-w-6xl space-y-6 sm:space-y-8">
+            <Scene
+              className={`border border-white/10 bg-black/28 px-4 py-5 shadow-[0_35px_120px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:px-6 sm:py-7 ${
+                step >= 1 ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              }`}
+            >
+              <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-6 lg:flex-row lg:gap-10">
+                <div className="relative w-full max-w-[420px] flex-none">
+                  <div className="absolute -inset-4 rounded-[40px] bg-[radial-gradient(circle_at_center,rgba(255,215,120,0.22),transparent_55%),radial-gradient(circle_at_top_right,rgba(255,105,180,0.16),transparent_30%)] blur-2xl" />
+                  <div className="relative overflow-hidden rounded-[36px] border border-white/14 bg-black/40 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.75)]">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[30px]">
+                      <Image
+                        src="/p2.jpeg"
+                        alt="main portrait"
+                        fill
+                        priority
+                        sizes="(max-width: 768px) 92vw, 420px"
+                        className="object-cover object-center motion-safe:animate-mainZoom"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(0,0,0,0.22))]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(255,215,120,0.12),transparent_36%),radial-gradient(circle_at_50%_75%,rgba(255,105,180,0.08),transparent_35%)]" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 text-center lg:text-left">
+                  <p className="mb-3 text-xs uppercase tracking-[0.42em] text-amber-100/70">A soft reveal</p>
+                  <h2 className="font-serif text-4xl leading-tight text-[#fff6eb] drop-shadow-[0_0_28px_rgba(255,210,120,0.2)] sm:text-5xl lg:text-6xl">
+                    Happy Birthday Pirunthu 💖
+                  </h2>
+                  <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#f9ead6]/86 lg:mx-0 lg:text-base">
+                    The moment opens like a memory: warm, romantic, and wrapped in a dark gold-pink glow.
+                  </p>
+
+                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[22px] border border-white/10 bg-white/5 px-4 py-4 text-left shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-md">
+                      <p className="text-xs uppercase tracking-[0.3em] text-amber-100/60">Scene one</p>
+                      <p className="mt-2 text-sm text-[#f7e7d0]/90">Photos fade in one by one with a slow cinematic pulse.</p>
+                    </div>
+                    <div className="rounded-[22px] border border-white/10 bg-white/5 px-4 py-4 text-left shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-md">
+                      <p className="text-xs uppercase tracking-[0.3em] text-amber-100/60">Scene two</p>
+                      <p className="mt-2 text-sm text-[#f7e7d0]/90">A gentle glow frames the portrait like a reference-video hero shot.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Scene>
+
+            <Scene
+              className={`border border-white/10 bg-black/24 px-6 py-7 shadow-[0_35px_120px_rgba(0,0,0,0.66)] backdrop-blur-xl sm:px-8 sm:py-10 ${
+                step >= 2 ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              }`}
+            >
+              <div className="mx-auto max-w-3xl text-center">
+                <p className="text-base leading-8 text-[#fff2df] sm:text-xl sm:leading-10 motion-safe:animate-textGlow">
+                  Even if we don’t talk like before,
+                  <br />
+                  you’ll always be special to me.
+                </p>
+              </div>
+            </Scene>
+
+            <Scene
+              className={`border border-white/10 bg-black/26 px-5 py-6 shadow-[0_40px_140px_rgba(0,0,0,0.75)] backdrop-blur-2xl sm:px-6 sm:py-8 ${
+                step >= 3 ? "scale-100 opacity-100" : "scale-[0.98] opacity-0"
+              }`}
+            >
+              <div className="flex flex-col-reverse items-center gap-7 lg:flex-row lg:gap-10">
+                <div className="flex-1 text-center lg:text-left">
+                  <p className="mb-3 text-xs uppercase tracking-[0.42em] text-amber-100/70">Final scene</p>
+                  <h3 className="font-serif text-3xl leading-tight text-[#fff7ec] sm:text-4xl lg:text-5xl motion-safe:animate-titleGlow">
+                    Happy Birthday Pirunthu 💖
+                  </h3>
+                  <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#f7e8d2]/88 lg:mx-0 lg:text-base">
+                    Wishing you peace, tenderness, and the kind of joy that stays with you long after the day is over.
+                  </p>
+                  <div className="mt-8">
+                    <p className="inline-flex rounded-full border border-amber-200/16 bg-white/5 px-5 py-2 text-sm font-semibold tracking-[0.18em] text-amber-100/80 shadow-[0_0_40px_rgba(255,200,120,0.12)] motion-safe:animate-madeGlow">
+                      Made with love by Sureka ❤️
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative w-full max-w-[420px] flex-none">
+                  <div className="absolute -inset-4 rounded-[40px] bg-[radial-gradient(circle_at_center,rgba(255,215,120,0.16),transparent_55%),radial-gradient(circle_at_bottom,rgba(255,105,180,0.12),transparent_32%)] blur-lg" />
+                  <div className="relative overflow-hidden rounded-[36px] border border-white/12 bg-black/35 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.72)]">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[30px]">
+                      <Image
+                        src="/p2.jpeg"
+                        alt="final portrait"
+                        fill
+                        sizes="(max-width: 768px) 92vw, 420px"
+                        className="object-cover object-center motion-safe:animate-finalZoom"
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.35))]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,120,0.08),transparent_38%),radial-gradient(circle_at_top,rgba(255,105,180,0.06),transparent_30%)]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Scene>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes bgZoom {
+          0% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.06);
+          }
+        }
+
+        @keyframes collageFadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(22px) scale(0.96);
+            filter: blur(6px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+
+        @keyframes mainZoom {
+          0% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.08);
+          }
+        }
+
+        @keyframes finalZoom {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          100% {
+            transform: scale(1.1);
+          }
+        }
+
+        @keyframes particleFloat {
+          0%,
+          100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0.45;
+          }
+          50% {
+            transform: translateY(-18px) translateX(6px);
+            opacity: 0.95;
+          }
+        }
+
+        @keyframes textGlow {
+          0%,
+          100% {
+            text-shadow: 0 0 0 rgba(255, 215, 120, 0);
+          }
+          50% {
+            text-shadow: 0 0 28px rgba(255, 215, 120, 0.34);
+          }
+        }
+
+        @keyframes titleGlow {
+          0%,
+          100% {
+            text-shadow: 0 0 10px rgba(255, 215, 120, 0.12), 0 0 0 rgba(255, 105, 180, 0);
+          }
+          50% {
+            text-shadow: 0 0 24px rgba(255, 215, 120, 0.22), 0 0 24px rgba(255, 105, 180, 0.12);
+          }
+        }
+
+        @keyframes madeGlow {
+          0%,
+          100% {
+            opacity: 0.82;
+            text-shadow: 0 0 0 rgba(255, 200, 120, 0);
+          }
+          50% {
+            opacity: 1;
+            text-shadow: 0 0 20px rgba(255, 200, 120, 0.34);
+          }
+        }
+
+        :global(.animate-bgZoom) {
+          animation: bgZoom 26s ease-in-out infinite alternate;
+        }
+
+        :global(.animate-collageFadeIn) {
+          animation: collageFadeIn 1.35s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+        }
+
+        :global(.animate-mainZoom) {
+          animation: mainZoom 28s ease-in-out infinite alternate;
+        }
+
+        :global(.animate-finalZoom) {
+          animation: finalZoom 24s ease-in-out infinite alternate;
+        }
+
+        :global(.animate-particleFloat) {
+          animation: particleFloat 14s ease-in-out infinite;
+        }
+
+        :global(.animate-textGlow) {
+          animation: textGlow 3.8s ease-in-out infinite;
+        }
+
+        :global(.animate-titleGlow) {
+          animation: titleGlow 4.8s ease-in-out infinite;
+        }
+
+        :global(.animate-madeGlow) {
+          animation: madeGlow 4.2s ease-in-out infinite;
+        }
+      `}</style>
+    </main>
   );
 }
+ 
