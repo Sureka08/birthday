@@ -15,7 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Birthday",
   description: "happy birthday💖",
+  icons: {
+    icon: "https://cdn-icons-png.flaticon.com/512/3159/3159066.png",
+  },
 };
+
 
 export default function RootLayout({
   children,
